@@ -1,6 +1,8 @@
 from queue import LifoQueue, SimpleQueue
 from typing import Callable
 
+from utils.logger import logger
+
 from .exceptions import CallableError, NotEnoughError
 
 
@@ -37,7 +39,7 @@ class Transaction:
                 task(*args, **kwargs)
                 self._callbacks.get()
             except Exception as e:
-                print(e)
+                logger.error(e)
                 self._rollback()
                 break
 
@@ -50,7 +52,7 @@ class Transaction:
                 callback, args, kwargs = self._callbacks.get()
                 callback(*args, **kwargs)
             except Exception as e:
-                print(e)
+                logger.error(e)
 
     def __enter__(self) -> "Transaction":
         return self

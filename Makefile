@@ -2,4 +2,4 @@ init:
 	pip install -r requirements.txt
 
 run:
-	python app.py
+	python app/main.py

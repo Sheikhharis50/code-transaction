@@ -1,20 +1,21 @@
 from time import sleep
 
 from transaction import Transaction
+from utils.logger import logger
 
 
 def task(num: int, raise_exception: bool = False):
-    print(f"Task{num} is running.")
+    logger.info(f"Task{num} is running.")
     sleep(2)
     if raise_exception:
         raise Exception(f"Task{num} failed to execute.")
-    print(f"Task{num} is executed.")
+    logger.info(f"Task{num} is executed.")
 
 
 def callback(num: int):
-    print(f"Executing task{num} rollback.")
+    logger.info(f"Executing task{num} rollback.")
     sleep(2)
-    print(f"Task{num} rollback is executed.")
+    logger.info(f"Task{num} rollback is executed.")
 
 
 def main():
