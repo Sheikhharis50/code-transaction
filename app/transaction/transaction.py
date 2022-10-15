@@ -24,16 +24,33 @@ class TransactionJob:
 
 class Transaction:
     def __init__(self) -> None:
+        """
+        The function initializes the task queue and the callback queue.
+        """
         self._tasks = SimpleQueue()
         self._callbacks = LifoQueue()
 
     def add_task(self, task: TransactionJob):
+        """
+        It adds a task to the queue and raise error if previous task,
+        do not have a callback.
+
+        :param task: TransactionJob
+        :type task: TransactionJob
+        """
         if self._tasks.qsize() != self._callbacks.qsize():
             raise NotEnoughError("callbacks")
 
         self._tasks.put(task)
 
     def add_callback(self, callback: TransactionJob):
+        """
+        If the number of tasks is equal to the number of callbacks, raise an exception
+        to add new task first.
+
+        :param callback: The callback function to be called when the task is completed
+        :type callback: TransactionJob
+        """
         if self._tasks.qsize() == self._callbacks.qsize():
             raise NotEnoughError("tasks")
 
@@ -41,7 +58,7 @@ class Transaction:
 
     def _execute(self):
         """
-        Execute all the tasks in queue.
+        Execute all the tasks in queue, rollback if any task failed and ignore_failed is False.
         """
         while not self._tasks.empty():
             task: TransactionJob = self._tasks.get()
@@ -58,7 +75,7 @@ class Transaction:
 
     def _rollback(self):
         """
-        Rollback if any exception is occurred.
+        Rollback if any task is failed to execute and ignore exception if ignore_failed is False.
         """
         while not self._callbacks.empty():
             callback: TransactionJob = self._callbacks.get()
@@ -71,9 +88,17 @@ class Transaction:
                 logger.info("Ignoring....")
 
     def __enter__(self) -> "Transaction":
+        """
+        `__enter__` is called when the `with` statement is executed
+        :return: The transaction object itself.
+        """
         return self
 
     def __exit__(self, *args, **kwargs):
+        """
+        It executes all the tasks and callbacks that have been added to the context manager, and then
+        deletes the left tasks and callbacks
+        """
         self._execute()
 
         del self._tasks
